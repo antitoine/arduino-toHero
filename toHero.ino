@@ -5,9 +5,10 @@
 
 
 /*********** Defines **********/
-#define DATA            6    // Pin connected to the DataIN of the LED strip
+#define DATA            12    // Pin connected to the DataIN of the LED strip
 #define BUTTON          7    // Input pin where the button is connected
-#define NUMLEDS         32   // Number of LEDs in the strip
+#define BUTTON_LED      3    // Output pin connected to the button LED
+#define NUMLEDS         31   // Number of LEDs in the strip
 #define STARTVAL        20   // Start value for the LED cycle
 #define ENDVAL          250  // End value for the LED cycle
 
@@ -25,6 +26,7 @@ short delayTime = 15; // Delay in milliseconds
 void setup() {
   pixels.begin(); // Initialize LED strip
   pinMode(BUTTON, INPUT); // Configure the button pin as an INPUT
+  pinMode(BUTTON_LED, OUTPUT); // Configure the led of the button as an OUTPUT
 }
 
 /*********** Main loop **********/
@@ -53,7 +55,7 @@ void loop() {
 
   /* Fill the values of each pixel */
   for (int i=0; i < NUMLEDS; i++) {    
-    if ((i == 1 + cursor || i == 32 - cursor) && mode == 3) {
+    if ((i == cursor || i == NUMLEDS - cursor) && mode == 3) {
       pixels.setPixelColor(i, pixels.Color(200,200,200));
     } else{
       pixels.setPixelColor(i, pixels.Color(red,green,blue));
@@ -67,7 +69,7 @@ void loop() {
   
   if (cursor == 15) {
     cursor ++;
-  } else if (cursor == 32) {
+  } else if (cursor == NUMLEDS) {
     cursor = 0;
   }
 
@@ -75,8 +77,8 @@ void loop() {
   if (cnt > (2 * ENDVAL - STARTVAL)) {
     cnt = STARTVAL;
   }
-      
-  delay(delayTime);
+
+  delay (delayTime);
 }
 
 
@@ -107,6 +109,9 @@ void setColors(int* r, int* g, int* b, int count, short mod) {
       default:
         break;
       }
+      
+    /* Set the PWM value to the button LED */
+    analogWrite (BUTTON_LED, cnt);
     } else {
       switch(mod) {
         case 0:
@@ -132,5 +137,8 @@ void setColors(int* r, int* g, int* b, int count, short mod) {
         default:
           break;
       }
+  
+  /* Set the PWM value to the button LED */
+  analogWrite (BUTTON_LED, 2 * ENDVAL - cnt);
   }
 }
